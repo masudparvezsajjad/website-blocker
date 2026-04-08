@@ -71,6 +71,31 @@ All commands that change the system need `sudo`.
 | `add-domain <host>` / `remove-domain <host>` | Edit the blocked list |
 | `uninstall` | Remove blocker-managed host entries and related state |
 
+## Uninstall
+
+1. **Stop the block page server** — If `daemon` is running in a terminal, press Ctrl+C. If you registered a `launchd` job for it, unload that job first.
+
+2. **Remove hosts entries and config** (requires `sudo`):
+
+   ```bash
+   sudo mps-blocker uninstall
+   ```
+
+   This strips the `# BEGIN ADULT_BLOCKER` … `# END ADULT_BLOCKER` section from `/etc/hosts` and deletes `config.json`. It does **not** remove the binary.
+
+3. **Remove the binary** (optional):
+
+   ```bash
+   sudo rm -f /opt/homebrew/bin/mps-blocker   # Apple Silicon (typical Homebrew path)
+   sudo rm -f /usr/local/bin/mps-blocker      # Intel or if not using /opt/homebrew
+   ```
+
+4. **Optional cleanup**
+   - Config support folder (only if empty or you want it gone):  
+     `rm -rf "$HOME/Library/Application Support/AdultBlocker"`
+   - Install-time hosts backup (still on disk unless you delete it):  
+     `/etc/hosts.adultblocker.bak`
+
 ## How it works
 
 1. Blocked domains are pointed at loopback in `/etc/hosts` (IPv4/IPv6 from config).
