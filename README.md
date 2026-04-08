@@ -30,7 +30,7 @@ chmod +x install.sh
 | Topic | Behavior |
 |--------|----------|
 | **OS** | macOS only; other systems exit with an error. |
-| **Architecture** | Apple Silicon (`arm64` / `aarch64`) → `mps-blocker_darwin_arm64.tar.gz`. Intel (`x86_64`) → `mps-blocker_darwin_amd64.tar.gz`. |
+| **Architecture** | Tries `mps-blocker_darwin_{arm64,amd64}.tar.gz` first; if missing (older releases), falls back to `adult-blocker_darwin_*.tar.gz` and installs the `blocker` binary as `mps-blocker`. |
 | **Version** | `VERSION` defaults to `latest` (GitHub “latest” release). Pin a tag: `VERSION=v1.2.3 ./install.sh`. |
 | **Download** | `https://github.com/masudparvezsajjad/website-blocker/releases/.../download/.../<asset>.tar.gz` |
 | **Install path** | `/opt/homebrew/bin` on Apple Silicon if that directory exists; otherwise `/usr/local/bin`. Uses `sudo install -m 0755`. |
