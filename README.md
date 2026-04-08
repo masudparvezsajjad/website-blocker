@@ -21,9 +21,10 @@ Designed for macOS, this tool blocks unwanted websites system-wide using `/etc/h
 1. Blocked domains are mapped to `127.0.0.1` via `/etc/hosts`
 2. A local HTTP server runs on `127.0.0.1:8088`
 3. When a blocked site is visited:
-  - DNS resolves to localhost
-  - Browser hits local server
-  - A custom "blocked" page is shown
+
+- DNS resolves to localhost
+- Browser hits local server
+- A custom "blocked" page is shown
 
 > ⚠️ Note: Some HTTPS sites may show a browser warning instead of the custom page. This is expected in the MVP version.
 
@@ -36,13 +37,13 @@ Designed for macOS, this tool blocks unwanted websites system-wide using `/etc/h
 ```bash
 git clone https://github.com/yourname/adult-blocker.git
 cd adult-blocker
-go build -o blocker ./cmd/blocker
+go build -o mps-blocker ./cmd/blocker
 ```
 
 ### 2. Install (requires sudo)
 
 ```bash
-sudo ./blocker install
+sudo ./mps-blocker install
 ```
 
 ---
@@ -58,7 +59,7 @@ sudo ./blocker enable
 ### Start Block Page Server
 
 ```bash
-sudo ./mps-blocke daemon
+sudo ./mps-blocker daemon
 ```
 
 ### Check Status
@@ -223,4 +224,3 @@ This tool is intended for **personal productivity and self-control purposes**.
 It is not a full security solution and should not be relied upon for enterprise-grade filtering.
 
 ---
-
