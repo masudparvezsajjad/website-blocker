@@ -1,0 +1,47 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/bin/
+/dist/
+
+# Test binary (`go test -c`)
+*.test
+
+# Coverage / profiling
+*.out
+coverage.*
+*.coverprofile
+cpu.prof
+mem.prof
+
+# Go workspace (local multi-module)
+go.work
+go.work.sum
+
+# Dependencies (uncomment if you never vendor)
+# vendor/
+
+# Local env and secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors / IDEs
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# Debug / temp
+tmp/
+temp/
+*.log
