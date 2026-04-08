@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="masudparvzsajjad/website-blocker"
+REPO="masudparvezsajjad/website-blocker"
 BINARY_NAME="mps-blocker"
 VERSION="${VERSION:-latest}"
 

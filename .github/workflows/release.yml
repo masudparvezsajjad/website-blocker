@@ -17,10 +17,10 @@ jobs:
         include:
           - goos: darwin
             goarch: arm64
-            asset_name: adult-blocker_darwin_arm64
+            asset_name: mps-blocker_darwin_arm64
           - goos: darwin
             goarch: amd64
-            asset_name: adult-blocker_darwin_amd64
+            asset_name: mps-blocker_darwin_amd64
 
     steps:
       - name: Checkout
@@ -29,18 +29,18 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version: "1.26.1"
 
       - name: Build
         run: |
           mkdir -p dist
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
-            go build -o dist/blocker ./cmd/blocker
+            go build -o dist/mps-blocker ./cmd/blocker
 
       - name: Package
         run: |
           mkdir -p package/${{ matrix.asset_name }}
-          cp dist/blocker package/${{ matrix.asset_name }}/blocker
+          cp dist/mps-blocker package/${{ matrix.asset_name }}/mps-blocker
           cp README.md package/${{ matrix.asset_name }}/README.md
           tar -czf dist/${{ matrix.asset_name }}.tar.gz -C package/${{ matrix.asset_name }} .
 

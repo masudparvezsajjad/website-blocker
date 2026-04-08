@@ -1,226 +1,107 @@
-# AdultBlocker (macOS MVP)
+# website-blocker
 
-A lightweight, terminal-based adult content blocker built with Go.
-Designed for macOS, this tool blocks unwanted websites system-wide using `/etc/hosts` and serves a local block page.
+**AdultBlocker** is a small macOS CLI that blocks unwanted websites system-wide by updating `/etc/hosts` and serving a simple “blocked” page on localhost.
 
----
+## Requirements
 
-## 🚀 Features
+- macOS (Apple Silicon or Intel)
+- `sudo` for changing `/etc/hosts` and installing the binary under `/usr/local` or `/opt/homebrew`
 
-- 🔒 System-wide domain blocking (works across all browsers)
-- 🧠 Simple rule-based domain management
-- 🌐 Local block page (`127.0.0.1`)
-- ⚡ Fast and lightweight (pure Go, no heavy dependencies)
-- 🛠 CLI-based control (install, enable, disable, status)
-- 🧩 Easy to extend (future DNS / Network Extension support)
+## Install a release (recommended)
 
----
+GitHub Releases publish `.tar.gz` archives. The install script downloads the right archive for your Mac, installs the `mps-blocker` binary, and tells you what to run next.
 
-## 🏗 How It Works
-
-1. Blocked domains are mapped to `127.0.0.1` via `/etc/hosts`
-2. A local HTTP server runs on `127.0.0.1:8088`
-3. When a blocked site is visited:
-
-- DNS resolves to localhost
-- Browser hits local server
-- A custom "blocked" page is shown
-
-> ⚠️ Note: Some HTTPS sites may show a browser warning instead of the custom page. This is expected in the MVP version.
-
----
-
-## 📦 Installation
-
-### 1. Clone & Build
+**Option A — run the script (review it first):**
 
 ```bash
-git clone https://github.com/yourname/adult-blocker.git
-cd adult-blocker
+curl -fsSL https://raw.githubusercontent.com/masudparvezsajjad/website-blocker/main/scripts/install.sh | bash
+```
+
+**Option B — download, inspect, then run:**
+
+```bash
+curl -fsSL -O https://raw.githubusercontent.com/masudparvezsajjad/website-blocker/main/scripts/install.sh
+chmod +x install.sh
+./install.sh
+```
+
+### What `scripts/install.sh` does
+
+| Topic | Behavior |
+|--------|----------|
+| **OS** | macOS only; other systems exit with an error. |
+| **Architecture** | Apple Silicon (`arm64` / `aarch64`) → `mps-blocker_darwin_arm64.tar.gz`. Intel (`x86_64`) → `mps-blocker_darwin_amd64.tar.gz`. |
+| **Version** | `VERSION` defaults to `latest` (GitHub “latest” release). Pin a tag: `VERSION=v1.2.3 ./install.sh`. |
+| **Download** | `https://github.com/masudparvezsajjad/website-blocker/releases/.../download/.../<asset>.tar.gz` |
+| **Install path** | `/opt/homebrew/bin` on Apple Silicon if that directory exists; otherwise `/usr/local/bin`. Uses `sudo install -m 0755`. |
+
+After the script finishes:
+
+```bash
+sudo mps-blocker install
+sudo mps-blocker enable
+sudo mps-blocker daemon
+```
+
+Keep `daemon` running in a terminal session, or register it with `launchd` if you want it to start automatically.
+
+## Build from source
+
+Requires [Go](https://go.dev/dl/) (see `go.mod` for the toolchain version).
+
+```bash
+git clone https://github.com/masudparvezsajjad/website-blocker.git
+cd website-blocker
 go build -o mps-blocker ./cmd/blocker
-```
-
-### 2. Install (requires sudo)
-
-```bash
 sudo ./mps-blocker install
-```
-
----
-
-## ▶️ Usage
-
-### Enable Blocking
-
-```bash
-sudo ./blocker enable
-```
-
-### Start Block Page Server
-
-```bash
+sudo ./mps-blocker enable
 sudo ./mps-blocker daemon
 ```
 
-### Check Status
+## Commands
 
-```bash
-sudo ./mps-blocker status
-```
+All commands that change the system need `sudo`.
 
-### Disable Blocking
+| Command | Description |
+|---------|-------------|
+| `install` | Create config if needed, back up `/etc/hosts`, apply rules if blocking is enabled |
+| `enable` / `disable` | Turn blocking on or off |
+| `status` | Show whether blocking is active |
+| `daemon` | HTTP server on localhost for the block page (default port **8088**) |
+| `add-domain <host>` / `remove-domain <host>` | Edit the blocked list |
+| `uninstall` | Remove blocker-managed host entries and related state |
 
-```bash
-sudo ./mps-blocker disable
-```
+## How it works
 
-### Uninstall
+1. Blocked domains are pointed at loopback in `/etc/hosts` (IPv4/IPv6 from config).
+2. With `daemon` running, HTTP requests to those names hit the local server and show the block page.
+3. **HTTPS** may show a browser certificate warning instead of the custom page; that is a normal limitation of hosts-based blocking.
 
-```bash
-sudo ./mps-blocker uninstall
-```
+## Configuration
 
----
+Config file: **`~/Library/Application Support/AdultBlocker/config.json`**
 
-## 🌍 Manage Domains
+Relevant fields include `enabled`, `block_page_port`, `blocked_domains`, `redirect_ipv4`, and `redirect_ipv6`. A default file is created on first use.
 
-### Add Domain
+## Limitations
 
-```bash
-sudo ./mps-blocker add-domain example.com
-```
+- Anyone with admin access can edit `/etc/hosts` or disable the tool.
+- VPNs, DNS-over-HTTPS, or custom resolvers can bypass hosts-based blocking.
+- This is not enterprise-grade or child-proof filtering.
 
-### Remove Domain
+## Security notes
 
-```bash
-sudo ./mps-blocker remove-domain example.com
-```
+- The block page server should stay bound to localhost only.
+- There is no remote control API; configuration is local JSON.
 
----
+## Contributing
 
-## ⚙️ Configuration
+Contributions are welcome: open an issue or a pull request with a short description of the change and how you tested it.
 
-Config file location:
+## License
 
-```bash
-/Library/Application Support/AdultBlocker/config.json
-```
+MIT
 
-Example:
+## Disclaimer
 
-```json
-{
-  "enabled": true,
-  "block_page_port": 8088,
-  "blocked_domains": ["yoursite.com", "youradultvideos.com"],
-  "redirect_ipv4": "127.0.0.1",
-  "redirect_ipv6": "::1"
-}
-```
-
----
-
-## 🔄 Auto Start (launchd)
-
-To run automatically on macOS startup:
-
-1. Copy binary:
-
-```bash
-sudo cp ./mps-blocker /usr/local/bin/mps-blocker
-```
-
-1. Create plist:
-
-```bash
-sudo nano /Library/LaunchDaemons/com.adultblocker.daemon.plist
-```
-
-1. Load service:
-
-```bash
-sudo launchctl bootstrap system /Library/LaunchDaemons/com.adultblocker.daemon.plist
-```
-
----
-
-## 🔐 Security Considerations
-
-This app is safe when used correctly:
-
-### ✔ Safe Practices
-
-- Runs only on `127.0.0.1` (no external exposure)
-- No remote API or network access
-- No shell injection (safe file handling)
-- Requires `sudo` only for system changes
-
-### ⚠ Things to Avoid
-
-- Do not bind server to `0.0.0.0`
-- Do not add remote control without authentication
-- Do not execute untrusted scripts or configs
-
----
-
-## ⚠ Limitations (MVP)
-
-- ❌ Easy to bypass (hosts file can be edited)
-- ❌ No protection against VPN / DNS-over-HTTPS
-- ❌ HTTPS block page not always shown
-- ❌ No category-based filtering yet
-
----
-
-## 🛣 Roadmap
-
-### Version 2
-
-- Password-protected disable/uninstall
-- Domain import (blocklists)
-- Logging (SQLite)
-- Auto launchd setup
-
-### Version 3
-
-- Local DNS server
-- Stronger anti-bypass mechanisms
-
-### Version 4
-
-- macOS Network Extension (DNS Proxy)
-- Advanced filtering + category detection
-
----
-
-## 🧠 Future Vision
-
-- Cross-platform (macOS, Windows, Linux)
-- System-level enforcement (WFP / Network Extension)
-- AI-powered content classification
-- Parental control / accountability features
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-- Fork the repo
-- Create a feature branch
-- Submit a PR
-
----
-
-## 📄 License
-
-MIT License (or your preferred license)
-
----
-
-## 🙌 Disclaimer
-
-This tool is intended for **personal productivity and self-control purposes**.
-It is not a full security solution and should not be relied upon for enterprise-grade filtering.
-
----
+This project is intended for **personal productivity and self-control**. It is provided as-is, without warranty, and is not a complete security or parental-control solution.
