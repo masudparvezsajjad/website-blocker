@@ -11,6 +11,7 @@ import (
 	"github.com/masudparvezsajjad/website-blocker/internal/config"
 	"github.com/masudparvezsajjad/website-blocker/internal/hosts"
 	platform "github.com/masudparvezsajjad/website-blocker/internal/platform/darwin"
+	"github.com/masudparvezsajjad/website-blocker/internal/reflectpause"
 	"github.com/masudparvezsajjad/website-blocker/internal/util"
 )
 
@@ -137,6 +138,14 @@ func disable() error {
 		return err
 	}
 
+	if err := reflectpause.Run(15, "turn off blocking"); err != nil {
+		if errors.Is(err, reflectpause.ErrAborted) {
+			fmt.Println("Nothing changed.")
+			return nil
+		}
+		return err
+	}
+
 	cfg.Enabled = false
 	if err := config.Save(cfg); err != nil {
 		return err
@@ -152,6 +161,14 @@ func disable() error {
 
 func uninstall() error {
 	if err := platform.EnsureRoot(); err != nil {
+		return err
+	}
+
+	if err := reflectpause.Run(15, "uninstall the blocker"); err != nil {
+		if errors.Is(err, reflectpause.ErrAborted) {
+			fmt.Println("Nothing changed.")
+			return nil
+		}
 		return err
 	}
 
@@ -241,6 +258,14 @@ func removeDomain(raw string) error {
 
 	cfg, err := config.Load()
 	if err != nil {
+		return err
+	}
+
+	if err := reflectpause.Run(15, fmt.Sprintf("remove %q from your block list", domain)); err != nil {
+		if errors.Is(err, reflectpause.ErrAborted) {
+			fmt.Println("Nothing changed.")
+			return nil
+		}
 		return err
 	}
 
